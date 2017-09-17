@@ -2,14 +2,14 @@ public class VehicleInfo {
     private int VIN;
     private double odometer;
     private double consumption;
-    private double odometerReading;
+    private double odometerLastOilChange;
     private double engineSize;
 
     public VehicleInfo() {
         this.VIN = VIN;
         this.odometer = odometer;
         this.consumption = consumption;
-        this.odometerReading = odometerReading;
+        this.odometerLastOilChange = odometerLastOilChange;
         this.engineSize = engineSize;
     }
 
@@ -37,12 +37,12 @@ public class VehicleInfo {
         this.consumption = consumption;
     }
 
-    public double getOdometerReading() {
-        return odometerReading;
+    public double getOdometerLastOilChange() {
+        return odometerLastOilChange;
     }
 
-    public void setOdometerReading(double odometerReading) {
-        this.odometerReading = odometerReading;
+    public void setOdometerLastOilChange(double odometerLastOilChange) {
+        this.odometerLastOilChange = odometerLastOilChange;
     }
 
     public double getEngineSize() {
