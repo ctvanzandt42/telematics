@@ -3,8 +3,9 @@ import java.util.Scanner;
 public class Main {
     public static void main(String[] args) {
         VehicleInfo vehicleInfo = new VehicleInfo();
-        System.out.println("What is the VIN of the vehicle?");
+
         Scanner scanner = new Scanner(System.in);
+        System.out.println("What is the VIN of the vehicle?");
         int VIN = Integer.parseInt(scanner.nextLine());
         System.out.println("What is the current odometer reading?");
         double odometer = Double.parseDouble(scanner.nextLine());
