@@ -1,86 +1,108 @@
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import javax.swing.text.html.HTML;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Scanner;
+
 
 public class TelematicsService {
 
-    void report(VehicleInfo vehicleInfo) {
-        // 1. create one JSON string for vehicle and output to a .json file
-        writeJsonFile(vehicleInfo);
+    ArrayList<VehicleInfo> vehicleList = new ArrayList<>();
 
-        // 2.
-        convertJson(vehicleInfo);
+    void report(VehicleInfo vehicleInfo) throws IOException {
 
-    }
-
-    private void writeJsonFile(VehicleInfo vehicleInfo) {
+        // (1) create and write out a JSON file
+        ObjectMapper mapper = new ObjectMapper();
         try {
-            File outputFile = new File(Integer.toString(vehicleInfo.getVIN()) + ".json");
-            FileWriter fileWriter = new FileWriter(outputFile);
-
-            ObjectMapper mapper = new ObjectMapper();
             String json = mapper.writeValueAsString(vehicleInfo);
 
-            fileWriter.write(json);
-            fileWriter.close();
-
-        } catch (Exception e) {
-            e.printStackTrace();
+            File file = new File(Integer.toString(vehicleInfo.getVIN()) + ".json");
+            try (FileWriter fileWriter = new FileWriter(file);) {
+                fileWriter.write(json);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        } catch (JsonProcessingException ex) {
+            ex.printStackTrace();
         }
-    }
+        // (2)
 
-    private void convertJson(VehicleInfo vehicleInfo) {
-        // for each JSON file:
-        //    build a new Vehicle obj
-        //    create a new TR line for each Vehicle's info (template engine fake)
+
+
         File file = new File(".");
-        String midHTML = "<html>\n" +
-                "  <title>Vehicle Telematics Dashboard</title>\n" +
-                "  <body>\n" +
-                "    <h1 align=\"center\">Averages for # vehicles</h1>\n" +
-                "    <table align=\"center\">\n" +
-                "        <tr>\n" +
-                "            <th>Odometer (miles) |</th><th>Consumption (gallons) |</th><th>Last Oil Change |</th><th>Engine Size (liters)</th>\n" +
-                "        </tr>\n" +
-                "        <tr>\n" +
-                "            <td align=\"center\">#</td><td align=\"center\">#</td><td align=\"center\">#</td align=\"center\"><td align=\"center\">#</td>\n" +
-                "        </tr>\n" +
-                "    </table>\n" +
-                "    <h1 align=\"center\">History</h1>\n" +
-                "    <table align=\"center\" border=\"1\">\n" +
-                "        <tr>\n" +
-                "            <th>VIN</th><th>Odometer (miles)</th><th>Consumption (gallons)</th><th>Last Oil Change</th><th>Engine Size (liters)</th>\n" +
-                "        </tr>";
         for (File f : file.listFiles()) {
             if (f.getName().endsWith(".json")) {
+                Scanner scanner = new Scanner(f);
+                // Now you have a File object named "f".
+                // You can use this to create a new instance of Scanner
+                String json = scanner.next();
+                VehicleInfo vi = mapper.readValue(json, VehicleInfo.class);    // creating object
 
-                ObjectMapper mapper = new ObjectMapper();
-                VehicleInfo vi = null;
-                try {
-                    vi = mapper.readValue(f, VehicleInfo.class);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-                 midHTML += "<tr>\n" +
-                        "            <td align=\"center\">#VIN</td><td align=\"center\">#Odometer</td><td align=\"center\">#Consumption</td><td align=\"center\">#LastOilChange</td align=\"center\"><td align=\"center\">#Enginesize</td>\n" +
-                        "        </tr>";
+                // add new obj to list
+                vehicleList.add(vi);
 
-                midHTML = midHTML.replaceAll("#VIN", Integer.toString(vi.getVIN()));
-                midHTML = midHTML.replaceAll("#Odometer", Double.toString(vi.getOdometer()));
-                midHTML = midHTML.replaceAll("#Consumption", Double.toString(vi.getConsumption()));
-                midHTML = midHTML.replaceAll("#LastOilChange", Double.toString(vi.getOdometerLastOilChange()));
-                midHTML = midHTML.replaceAll("#Enginesize", Double.toString(vi.getEngineSize()));
-
-                midHTML += "</table>\n" +
-                        "  </body>\n" +
-                        "</html>";
             }
+        }
+        String html = htmlMerge();
+
+        // save html to file
+
+        File file1 = new File("Dashboard.html");
+        try (FileWriter fw = new FileWriter(file1)) {
+            fw.write(html);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+
+    }// (3)
+
+
+    // generate the entire HTML - consists of all the vehicles on separate TR
+    private String htmlMerge() {
+        String topHTML = "<!DOCTYPE html>\n" +
+                "<html lang=\"en\">\n" +
+                "<head>\n" +
+                "    <meta charset=\"UTF-8\">\n" +
+                "    <title>Vehicle Telematics Dashboard</title>\n" +
+                "</head>\n" +
+                "<body>\n" +
+                "\n" +
+                "<h1 align=\"center\">Averages for 2 vehicles</h1>\n" +
+                "\n" +
+                "<h1 align=\"center\">History</h1>\n" +
+                "<table align=\"center\" border=\"1\">\n" +
+                "    <th>\n" +
+                "        <th>VIN</th><th>Odometer (miles)</th><th>Consumption (gallons)</th><th>Last Oil Change</th><th>Engine Size (liters)</th>";
+        String midHTML = "";
+        for (VehicleInfo v : vehicleList) {
+
+            // spin thru add each v as a new TR line
+            midHTML += "<tr>\n" +
+                    "        <td align=\"center\"></td><td align=\"center\">#vin</td><td align=\"center\">#odom</td><td align=\"center\">#consum</td><td align=\"center\">#lastoil</td><td align=\"center\">#engine</td>\n" +
+                    "    </tr>";
+            midHTML = midHTML.replaceFirst("#vin", String.valueOf(v.getVIN()))
+                    .replaceFirst("#odom", String.valueOf(v.getOdometer()))
+                    .replaceFirst("#consum", String.valueOf(v.getConsumption()))
+                    .replaceFirst("#lastoil", String.valueOf(v.getOdometerLastOilChange()))
+                    .replaceFirst("#engine", String.valueOf(v.getEngineSize()));
 
         }
+        String bottomHTML = "</table>\n" +
+                "\n" +
+                "</body>\n" +
+                "</html>";
+
+        return topHTML + midHTML + bottomHTML;
+
+
+
     }
+
+
 }
 

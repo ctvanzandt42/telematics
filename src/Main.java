@@ -1,3 +1,4 @@
+import java.io.IOException;
 import java.util.Scanner;
 
 public class Main {
@@ -24,6 +25,10 @@ public class Main {
         vehicleInfo.setEngineSize(engineSize);
 
         TelematicsService service = new TelematicsService();
-        service.report(vehicleInfo);
+        try {
+            service.report(vehicleInfo);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }
