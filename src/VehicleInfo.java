@@ -6,11 +6,6 @@ public class VehicleInfo {
     private double engineSize;
 
     public VehicleInfo() {
-        this.VIN = VIN;
-        this.odometer = odometer;
-        this.consumption = consumption;
-        this.odometerLastOilChange = odometerLastOilChange;
-        this.engineSize = engineSize;
     }
 
     public int getVIN() {

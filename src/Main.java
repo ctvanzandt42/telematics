@@ -15,6 +15,7 @@ public class Main {
         double odometerLastOilChange = Double.parseDouble(scanner.nextLine());
         System.out.println("What is the size of the engine in liters?");
         double engineSize = Double.parseDouble(scanner.nextLine());
+        scanner.close();
 
         vehicleInfo.setVIN(VIN);
         vehicleInfo.setOdometer(odometer);
@@ -22,7 +23,7 @@ public class Main {
         vehicleInfo.setOdometerLastOilChange(odometerLastOilChange);
         vehicleInfo.setEngineSize(engineSize);
 
-
-
+        TelematicsService service = new TelematicsService();
+        service.report(vehicleInfo);
     }
 }
